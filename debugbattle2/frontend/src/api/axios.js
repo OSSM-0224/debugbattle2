@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: 'https://debugbattle2-1-jp6s.onrender.com',
+  baseURL: 'https://debugbattle2-1-jp6s.onrender.com/api',
   withCredentials: true, // Required to send cookies
 });
 
