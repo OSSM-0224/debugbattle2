@@ -57,7 +57,6 @@ const registerUser = asyncHandler(async (req, res) => {
       _id: user.id,
       username: user.username,
       email: user.email,
-      password: user.password,
       accessToken,
     });
   } else {
@@ -91,7 +90,6 @@ const loginUser = asyncHandler(async (req, res) => {
       _id: user.id,
       username: user.username,
       email: user.email,
-      password: user.password,
       accessToken,
     });
   } else {
@@ -114,7 +112,7 @@ const refresh = asyncHandler(async (req, res) => {
   const refreshToken = cookies.jwt;
 
   try {
-    const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     
     // Find user to ensure they still exist
     const user = await User.findById(decoded.id);

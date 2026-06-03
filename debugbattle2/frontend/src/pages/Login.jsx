@@ -68,7 +68,7 @@ const Login = () => {
               <Input
                 id="password"
                 type="password"
-                name="password"
+                name="pass"
                 value={formData.password}
                 onChange={handleChange}
                 required
