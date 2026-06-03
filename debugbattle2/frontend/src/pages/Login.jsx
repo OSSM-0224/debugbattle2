@@ -76,10 +76,8 @@ const Login = () => {
               </div>
               <Input
                 id="password"
-                type="string"
+                type="password"
                 name="password"
-                inputMode="numeric"
-                pattern="[0-9]*"
                 value={formData.password}
                 onChange={handleChange}
                 required
