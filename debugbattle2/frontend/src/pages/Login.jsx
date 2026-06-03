@@ -1,17 +1,24 @@
-import React, { useState, useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { LogIn } from 'lucide-react';
+import React, { useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { useNavigate, Link } from "react-router-dom";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { LogIn } from "lucide-react";
 
 const Login = () => {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -19,12 +26,12 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     try {
       await login(formData.email, formData.password);
-      navigate('/profile');
+      navigate("/profile");
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.message || "Login failed");
     }
   };
 
@@ -37,7 +44,9 @@ const Login = () => {
               <LogIn className="h-6 w-6 text-white" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">Welcome back</CardTitle>
+          <CardTitle className="text-2xl font-bold tracking-tight">
+            Welcome back
+          </CardTitle>
           <CardDescription>
             Enter your email and password to sign in
           </CardDescription>
@@ -67,8 +76,10 @@ const Login = () => {
               </div>
               <Input
                 id="password"
-                type="password"
+                type="string"
                 name="password"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={formData.password}
                 onChange={handleChange}
                 required
@@ -81,8 +92,11 @@ const Login = () => {
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-black font-medium hover:underline">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="text-black font-medium hover:underline"
+            >
               Sign up
             </Link>
           </p>
