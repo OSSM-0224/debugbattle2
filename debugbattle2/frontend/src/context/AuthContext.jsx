@@ -8,21 +8,25 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const response = await axios.get('/users/profile');
-          setUser(response.data);
-        } catch (error) {
-          console.error('Error fetching user profile', error);
+  const fetchUser = async () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const response = await axios.get('/users/profile');
+        setUser(response.data);
+      } catch (error) {
+        console.error('Error fetching user profile', error);
+        // Sirf unauthorized hone par logout kare
+        if (error.response?.status === 401) {
+          localStorage.removeItem('token');
         }
       }
-      setLoading(false);
-    };
+    }
+    setLoading(false);
+  };
 
-    fetchUser();
-  }, []);
+  fetchUser();
+}, []);
 
   const login = async (email, password) => {
     const response = await axios.post('/auth/login', { email, password });

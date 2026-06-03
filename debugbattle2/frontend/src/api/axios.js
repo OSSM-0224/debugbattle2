@@ -2,10 +2,9 @@ import axios from 'axios';
 
 const instance = axios.create({
   baseURL: 'https://debugbattle2-1-jp6s.onrender.com/api',
-  withCredentials: true, // Required to send cookies
+  withCredentials: true,
 });
-
-// Add a request interceptor
+//added a response interceptors
 instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -14,33 +13,24 @@ instance.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Add a response interceptor for refresh token logic
 instance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
-    // If error is 401 and we haven't retried yet
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      
+
       try {
-        // Attempt to refresh token
-        const res = await axios.post('http://localhost:5000/api/auth/refresh', {}, { withCredentials: true });
-        
-        // Save new access token
+        // ✅ instance use karo, localhost nahi
+        const res = await instance.post('/auth/refresh', {}, { withCredentials: true });
         localStorage.setItem('token', res.data.accessToken);
-        
-        // Update header and retry original request
         originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
         return instance(originalRequest);
       } catch (refreshError) {
-        // Refresh token failed or expired
         localStorage.removeItem('token');
         window.location.href = '/login';
         return Promise.reject(refreshError);
