@@ -139,7 +139,7 @@ const Dashboard = () => {
   });
 
   const fetchData = async () => {
-    setLoading(true);
+    setLoading(false);
     try {
       const [prodRes, ordRes, invRes] = await Promise.all([
         axios.get('/products'),
@@ -157,20 +157,28 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+  const loadData = async () => {
+    await fetchData();
+  };
+
+  loadData();
+}, []);
 
   // Sync profile editing data
   useEffect(() => {
-    if (user && user.profile) {
-      setProfileData({
-        skills: user.profile.skills || '',
-        post: user.profile.post || '',
-        roles: user.profile.roles || '',
-        address: user.profile.address || ''
-      });
-    }
-  }, [user]);
+  if (!user?.profile) return;
+
+  const profile = user.profile;
+
+  setTimeout(() => {
+    setProfileData({
+      skills: profile.skills || '',
+      post: profile.post || '',
+      roles: profile.roles || '',
+      address: profile.address || ''
+    });
+  }, 0);
+}, [user]);
 
   const handleLogout = () => {
     logout();
@@ -212,46 +220,60 @@ const Dashboard = () => {
   };
 
   const handleProductSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const formData = new FormData();
-      formData.append('name', newProduct.name);
-      formData.append('description', newProduct.description);
-      formData.append('price', newProduct.price);
-      formData.append('sku', newProduct.sku);
-      formData.append('category', newProduct.category);
-      formData.append('initialStock', newProduct.initialStock);
-      formData.append('warehouse', newProduct.warehouse);
-      formData.append('variants', productVariants.toString());
+  e.preventDefault();
 
-      if (productImage) {
-        formData.append('image', productImage);
-      }
+  try {
+    const formData = new FormData();
 
-      await axios.post('/product', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+    formData.append('name', newProduct.name);
+    formData.append('description', newProduct.description);
+    formData.append('price', newProduct.price);
+    formData.append('sku', newProduct.sku);
+    formData.append('category', newProduct.category);
+    formData.append('initialStock', newProduct.initialStock);
+    formData.append('warehouse', newProduct.warehouse);
 
-      setShowProductModal(false);
-      setProductImage(null);
-      setProductVariants([]);
-      setNewProduct({
-        name: '',
-        description: '',
-        price: '',
-        sku: '',
-        category: '',
-        initialStock: '0',
-        warehouse: storeSettings.defaultWarehouse
-      });
-      showToast(`Product "${newProduct.name}" created successfully.`, 'success');
-      fetchData();
-    } catch (err) {
-      showToast(err.response?.data?.message || 'Failed to add product', 'destructive');
+    // FIX
+    formData.append(
+      'variants',
+      JSON.stringify(productVariants)
+    );
+
+    if (productImage) {
+      formData.append('image', productImage);
     }
-  };
+
+    await axios.post('/products', formData);
+
+    setShowProductModal(false);
+    setProductImage(null);
+    setProductVariants([]);
+
+    setNewProduct({
+      name: '',
+      description: '',
+      price: '',
+      sku: '',
+      category: '',
+      initialStock: '0',
+      warehouse: storeSettings.defaultWarehouse
+    });
+
+    showToast(
+      `Product "${newProduct.name}" created successfully.`,
+      'success'
+    );
+
+    fetchData();
+
+  } catch (err) {
+    console.error(err.response?.data);
+    showToast(
+      err.response?.data?.message || 'Failed to add product',
+      'destructive'
+    );
+  }
+};
 
   // Add Order handlers
   const handleOrderItemsChange = (index, field, value) => {
@@ -1046,7 +1068,7 @@ const Dashboard = () => {
                               <UserCircle className="h-4 w-4 text-zinc-400" />
                               Technical Profile Details
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-zinc-450">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-white">
                               <p><span className="font-semibold text-zinc-350">ID:</span> {user.id || user._id}</p>
                               <p><span className="font-semibold text-zinc-355">Username:</span> {user.username}</p>
                               <p><span className="font-semibold text-zinc-355">Email:</span> {user.email}</p>
@@ -1083,7 +1105,7 @@ const Dashboard = () => {
                       {isEditingProfile ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                           <div className="space-y-2">
-                            <Label className="text-zinc-300 text-xs">Primary Skill</Label>
+                            <Label className="text-white text-xs">Primary Skill</Label>
                             <Select value={profileData.skills} onValueChange={(val) => setProfileData({ ...profileData, skills: val })}>
                               <SelectTrigger className="bg-black border-zinc-800 text-white">
                                 <SelectValue placeholder="Select a skill..." />
@@ -1099,7 +1121,7 @@ const Dashboard = () => {
                           </div>
                           
                           <div className="space-y-2">
-                            <Label className="text-zinc-300 text-xs">Post / Position</Label>
+                            <Label className="text-white text-xs">Post / Position</Label>
                             <Select value={profileData.post} onValueChange={(val) => setProfileData({ ...profileData, post: val })}>
                               <SelectTrigger className="bg-black border-zinc-800 text-white">
                                 <SelectValue placeholder="Select a position..." />
@@ -1115,7 +1137,7 @@ const Dashboard = () => {
                           </div>
 
                           <div className="space-y-2">
-                            <Label className="text-zinc-300 text-xs">Roles</Label>
+                            <Label className="text-white text-xs">Roles</Label>
                             <Select value={profileData.roles} onValueChange={(val) => setProfileData({ ...profileData, roles: val })}>
                               <SelectTrigger className="bg-black border-zinc-800 text-white">
                                 <SelectValue placeholder="Select a role..." />
@@ -1130,7 +1152,7 @@ const Dashboard = () => {
                           </div>
 
                           <div className="space-y-2">
-                            <Label className="text-zinc-300 text-xs">Personal Address</Label>
+                            <Label className="text-white text-xs">Personal Address</Label>
                             <Input 
                               type="text" 
                               name="address" 
@@ -1148,7 +1170,7 @@ const Dashboard = () => {
                               <GraduationCap className="h-5 w-5 text-zinc-300" />
                             </div>
                             <div>
-                              <h3 className="text-sm font-semibold text-zinc-250">Primary Skill</h3>
+                              <h3 className="text-sm font-semibold text-white">Primary Skill</h3>
                               <p className="text-zinc-400 mt-1">{user.profile?.skills || 'Not specified'}</p>
                             </div>
                           </div>
@@ -1158,7 +1180,7 @@ const Dashboard = () => {
                               <Briefcase className="h-5 w-5 text-zinc-300" />
                             </div>
                             <div>
-                              <h3 className="text-sm font-semibold text-zinc-250">Post / Position</h3>
+                              <h3 className="text-sm font-semibold text-white">Post / Position</h3>
                               <p className="text-zinc-400 mt-1">{user.profile?.post || 'Not specified'}</p>
                             </div>
                           </div>
@@ -1168,7 +1190,7 @@ const Dashboard = () => {
                               <Shield className="h-5 w-5 text-zinc-300" />
                             </div>
                             <div>
-                              <h3 className="text-sm font-semibold text-zinc-250">Roles</h3>
+                              <h3 className="text-sm font-semibold text-white">Roles</h3>
                               <p className="text-zinc-400 mt-1">{user.profile?.roles || 'Not specified'}</p>
                             </div>
                           </div>
@@ -1178,7 +1200,7 @@ const Dashboard = () => {
                               <MapPin className="h-5 w-5 text-zinc-300" />
                             </div>
                             <div>
-                              <h3 className="text-sm font-semibold text-zinc-250">Personal Address</h3>
+                              <h3 className="text-sm font-semibold text-white">Personal Address</h3>
                               <p className="text-zinc-400 mt-1">{user.profile?.address || 'Not specified'}</p>
                             </div>
                           </div>
@@ -1363,7 +1385,7 @@ const Dashboard = () => {
                     type="button" 
                     onClick={handleAddVariantDraft} 
                     variant="outline"
-                    className="h-8 text-xs border-zinc-800 text-zinc-300 hover:bg-zinc-900"
+                    className="h-8 text-xs border-zinc-800 text-black hover:bg-white"
                   >
                     + Add Variation Row
                   </Button>
@@ -1442,7 +1464,7 @@ const Dashboard = () => {
                   type="button" 
                   variant="outline" 
                   onClick={addOrderItemField} 
-                  className="border-zinc-800 text-xs h-8 text-zinc-350 hover:bg-zinc-900 flex items-center gap-1"
+                  className="border-zinc-800 text-xs h-8 text-black hover:bg-zinc-900 flex items-center gap-1"
                 >
                   <Plus className="h-3.5 w-3.5" /> Add Item Line
                 </Button>
@@ -1527,7 +1549,7 @@ const Dashboard = () => {
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-zinc-900">
-              <Button type="button" variant="outline" onClick={() => setShowOrderModal(false)} className="border-zinc-800 text-zinc-355">Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setShowOrderModal(false)} className="border-zinc-800 text-black">Cancel</Button>
               <Button type="submit" className="bg-white text-black hover:bg-zinc-200">Submit Order</Button>
             </div>
           </form>
@@ -1629,7 +1651,7 @@ const Dashboard = () => {
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-zinc-900">
-              <Button type="button" variant="outline" onClick={() => setShowInventoryModal(false)} className="border-zinc-800 text-zinc-350">Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => setShowInventoryModal(false)} className="border-zinc-800 text-black">Cancel</Button>
               <Button type="submit" className="bg-white text-black hover:bg-zinc-200">Apply Adjustment</Button>
             </div>
           </form>
