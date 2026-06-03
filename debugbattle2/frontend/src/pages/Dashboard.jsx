@@ -327,7 +327,7 @@ const Dashboard = () => {
           quantity: Number(item.quantity)
         }))
       };
-      const response = await axios.post('/order', payload);
+      const response = await axios.post('/orders', payload);
       showToast(`Order ${response.data.orderNumber} created successfully.`, 'success');
       setShowOrderModal(false);
       setNewOrder({
