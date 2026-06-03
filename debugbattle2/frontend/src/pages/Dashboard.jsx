@@ -139,7 +139,7 @@ const Dashboard = () => {
   });
 
   const fetchData = async () => {
-    setLoading(false);
+    setLoading(true);
     try {
       const [prodRes, ordRes, invRes] = await Promise.all([
         axios.get('/products'),
@@ -152,7 +152,7 @@ const Dashboard = () => {
       setLoading(false);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
-      setLoading(true);
+      setLoading(false);
     }
   };
 

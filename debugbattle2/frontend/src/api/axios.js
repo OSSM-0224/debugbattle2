@@ -21,11 +21,17 @@ instance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    
+    if (originalRequest.url?.includes('/auth/refresh')) {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+      return Promise.reject(error);
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
-        // ✅ instance use karo, localhost nahi
         const res = await instance.post('/auth/refresh', {}, { withCredentials: true });
         localStorage.setItem('token', res.data.accessToken);
         originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
@@ -36,6 +42,7 @@ instance.interceptors.response.use(
         return Promise.reject(refreshError);
       }
     }
+
     return Promise.reject(error);
   }
 );
